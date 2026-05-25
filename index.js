@@ -14,9 +14,10 @@ const port = process.env.PORT || 8000;
 
 
 
+const uri = `mongodb+srv://${process.env.DB}:${process.env.PASSWORD}@cluster0.ret3q0v.mongodb.net/?appName=Cluster0`;
 
+// const uri = "mongodb+srv://process.env.DB:process.env.PASSWORD@cluster0.ret3q0v.mongodb.net/?appName=Cluster0";
 
-const uri = "mongodb+srv://medi_queue_tutor:pg6rtpBscRtuEjFO@cluster0.ret3q0v.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,13 +30,17 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-  
+
     await client.connect();
-   
+
     const db = client.db("mediqueue")
     const tutorsCollection = db.collection("tutors")
 
-
+    app.get('/tutors', async (req, res) => {
+      const cursor = tutorsCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
 
 
