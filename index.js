@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -10,16 +10,10 @@ app.use(cors())
 const port = process.env.PORT || 8000;
 
 
-
-
-
-
 const uri = `mongodb+srv://${process.env.DB}:${process.env.PASSWORD}@cluster0.ret3q0v.mongodb.net/?appName=Cluster0`;
 
-// const uri = "mongodb+srv://process.env.DB:process.env.PASSWORD@cluster0.ret3q0v.mongodb.net/?appName=Cluster0";
 
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -36,11 +30,25 @@ async function run() {
     const db = client.db("mediqueue")
     const tutorsCollection = db.collection("tutors")
 
-    app.get('/tutors', async (req, res) => {
+
+    app.get('/tutors/all', async (req, res) => {
       const cursor = tutorsCollection.find()
       const result = await cursor.toArray()
       res.send(result)
-    })
+    });
+
+    app.get('/tutors', async (req, res) => {
+      const cursor = tutorsCollection.find().limit(6)
+      const result = await cursor.toArray()
+      res.send(result)
+    });
+
+    app.get('/tutors/:tutorId', async (req, res) => {
+      const { tutorId } = req.params;
+      const query = { _id: new ObjectId(tutorId) }
+      const result = await tutorsCollection.findOne(query)
+      res.send(result)
+    });
 
 
 
