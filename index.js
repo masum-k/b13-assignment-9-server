@@ -10,7 +10,7 @@ app.use(cors())
 const port = process.env.PORT || 8000;
 
 
-const uri = `mongodb+srv://${process.env.DB}:${process.env.PASSWORD}@cluster0.ret3q0v.mongodb.net/?appName=Cluster0`;
+const uri = process.env.MONGODB_URI
 
 
 
