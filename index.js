@@ -2,9 +2,11 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const { createRemoteJWKSet } = require('jose-cjs');
 const app = express();
 
 dotenv.config();
+
 app.use(cors())
 
 const port = process.env.PORT || 8000;
@@ -12,7 +14,9 @@ const port = process.env.PORT || 8000;
 
 const uri = process.env.MONGODB_URI
 
+const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`))
 
+console.log(JWKS)
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -21,6 +25,14 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+const verifyToken = (req, res, next) => {
+  const { authorization } = req.headers;
+
+  const token = authorization?.split(' ')[1];
+
+  next();
+}
 
 async function run() {
   try {
@@ -43,7 +55,7 @@ async function run() {
       res.send(result)
     });
 
-    app.get('/tutors/:tutorId', async (req, res) => {
+    app.get('/tutors/:tutorId', verifyToken, async (req, res) => {
       const { tutorId } = req.params;
       const query = { _id: new ObjectId(tutorId) }
       const result = await tutorsCollection.findOne(query)
