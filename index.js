@@ -2,7 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const { createRemoteJWKSet } = require('jose-cjs');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 const app = express();
 
 dotenv.config();
@@ -26,13 +26,32 @@ const client = new MongoClient(uri, {
   }
 });
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const { authorization } = req.headers;
 
   const token = authorization?.split(' ')[1];
 
-  next();
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const JWKS = createRemoteJWKSet(
+      new URL('http://localhost:3000/api/auth/jwks')
+    )
+    const { payload } = await jwtVerify(token, JWKS);
+    req.user = payload;
+
+    next();
+  }
+  catch (error) {
+    console.error('Token validation failed:', error)
+    throw error
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
 }
+
 
 async function run() {
   try {
@@ -50,8 +69,17 @@ async function run() {
     });
 
     app.get('/tutors', async (req, res) => {
-      const cursor = tutorsCollection.find().limit(6)
+
+      const { search } = req.query;
+      let cursor;
+
+      if (search) {
+        cursor = tutorsCollection.find({ title: { $eq: search } });
+      } else { const cursor = tutorsCollection.find().limit(6) }
+
+
       const result = await cursor.toArray()
+
       res.send(result)
     });
 
