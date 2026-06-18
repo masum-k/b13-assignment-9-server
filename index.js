@@ -60,6 +60,7 @@ async function run() {
 
     const db = client.db("mediqueue")
     const tutorsCollection = db.collection("tutors")
+    const sessionCollection = db.collection("tutors")
 
 
     app.get('/tutors/all', async (req, res) => {
@@ -70,14 +71,14 @@ async function run() {
 
     app.get('/tutors', async (req, res) => {
 
-      const { search } = req.query;
-      let cursor;
+      // const { search } = req.query;
+      // let cursor;
 
-      if (search) {
-        cursor = tutorsCollection.find({ title: { $eq: search } });
-      } else { const cursor = tutorsCollection.find().limit(6) }
+      // if (search) {
+      //   cursor = tutorsCollection.find({ title: { $eq: search } });
+      // } else { const cursor = tutorsCollection.find().limit(6) }
 
-
+      const cursor = tutorsCollection.find().limit(6)
       const result = await cursor.toArray()
 
       res.send(result)
@@ -88,6 +89,29 @@ async function run() {
       const query = { _id: new ObjectId(tutorId) }
       const result = await tutorsCollection.findOne(query)
       res.send(result)
+    });
+
+    app.patch("/my-booked-session/:tutorId", verifyToken, async (req, res) => {
+      const { tutorId } = req.params;
+      const tutorData = req.body;
+
+      const course = await tutorsCollection.find({ _id: new ObjectId(tutorId) })
+
+      if (!course) {
+        req.status(404).json({ message: "Tutors Not Found" })
+      }
+
+      await tutorsCollection.updateOne(
+        { _id: new ObjectId(tutorId) },
+        { $inc: { bookedCount: -1 } }
+      );
+
+      const result = await sessionCollection.insertOne({
+        ...tutorData,
+      });
+
+      res.send(result)
+
     });
 
 
