@@ -1,3 +1,9 @@
+const dns = require("dns")
+dns.setServers([
+  "1.1.1.1",
+  '8.8.8.8'
+])
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const dotenv = require('dotenv');
@@ -12,7 +18,8 @@ app.use(cors())
 const port = process.env.PORT || 8000;
 
 
-const uri = process.env.MONGODB_URI
+// const uri = process.env.MONGODB_URI
+const uri = "mongodb+srv://medi_queue_tutor:PV2E7mQnEk4bP21Q@cluster0.ret3q0v.mongodb.net/?appName=Cluster0";
 
 const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`))
 
@@ -44,6 +51,7 @@ const verifyToken = async (req, res, next) => {
 
     next();
   }
+
   catch (error) {
     console.error('Token validation failed:', error)
     throw error
@@ -121,8 +129,8 @@ async function run() {
     // await client.close(); 
   }
 }
-run().catch(console.dir);
 
+run().catch(console.dir);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
