@@ -99,7 +99,7 @@ async function run() {
       res.send(result)
     });
 
-    app.patch("/my-booked-session/:tutorId", verifyToken, async (req, res) => {
+    app.patch("/booked-session/:tutorId", verifyToken, async (req, res) => {
       const { tutorId } = req.params;
       const tutorData = req.body;
 
