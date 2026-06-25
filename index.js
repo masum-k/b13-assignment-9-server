@@ -100,6 +100,12 @@ async function run() {
       res.send(result)
     });
 
+    app.get("/booked-session/:userId", async (req, res) => {
+      const {userId} = req.params
+      const result = await sessionCollection.find({userId: userId}).toArray();
+      res.send(result)
+    })
+
     app.patch("/booked-session/:tutorId", verifyToken, async (req, res) => {
       const { tutorId } = req.params;
       const tutorData = req.body;
