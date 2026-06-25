@@ -98,7 +98,8 @@ async function run() {
       const query = { _id: new ObjectId(tutorId) }
       const result = await tutorsCollection.findOne(query)
       res.send(result)
-    });
+    }); 
+    
 
     app.get("/booked-session/:userId", async (req, res) => {
       const {userId} = req.params
