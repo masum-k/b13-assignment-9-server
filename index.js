@@ -14,6 +14,7 @@ const app = express();
 dotenv.config();
 
 app.use(cors())
+app.use(express.json())
 
 const port = process.env.PORT || 8000;
 
@@ -68,7 +69,7 @@ async function run() {
 
     const db = client.db("mediqueue")
     const tutorsCollection = db.collection("tutors")
-    const sessionCollection = db.collection("tutors")
+    const sessionCollection = db.collection("booked_session")
 
 
     app.get('/tutors/all', async (req, res) => {
@@ -111,7 +112,7 @@ async function run() {
 
       await tutorsCollection.updateOne(
         { _id: new ObjectId(tutorId) },
-        { $inc: { bookedCount: -1 } }
+        { $inc: { bookedCount: 1 } }
       );
 
       const result = await sessionCollection.insertOne({
