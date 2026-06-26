@@ -98,12 +98,12 @@ async function run() {
       const query = { _id: new ObjectId(tutorId) }
       const result = await tutorsCollection.findOne(query)
       res.send(result)
-    }); 
-    
+    });
 
-    app.get("/booked-session/:userId", async (req, res) => {
-      const {userId} = req.params
-      const result = await sessionCollection.find({userId: userId}).toArray();
+
+    app.get("/booked-session/:userId", verifyToken, async (req, res) => {
+      const { userId } = req.params
+      const result = await sessionCollection.find({ userId: userId }).toArray();
       res.send(result)
     })
 
