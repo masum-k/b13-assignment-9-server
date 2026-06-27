@@ -1,3 +1,9 @@
+const dns = require("dns")
+dns.setServers([
+  "1.1.1.1",
+  '8.8.8.8'
+])
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const dotenv = require('dotenv');
@@ -8,11 +14,13 @@ const app = express();
 dotenv.config();
 
 app.use(cors())
+app.use(express.json())
 
 const port = process.env.PORT || 8000;
 
 
-const uri = process.env.MONGODB_URI
+// const uri = process.env.MONGODB_URI
+const uri = "mongodb+srv://medi_queue_tutor:PV2E7mQnEk4bP21Q@cluster0.ret3q0v.mongodb.net/?appName=Cluster0";
 
 const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`))
 
@@ -44,6 +52,7 @@ const verifyToken = async (req, res, next) => {
 
     next();
   }
+
   catch (error) {
     console.error('Token validation failed:', error)
     throw error
@@ -60,7 +69,7 @@ async function run() {
 
     const db = client.db("mediqueue")
     const tutorsCollection = db.collection("tutors")
-    const sessionCollection = db.collection("tutors")
+    const sessionCollection = db.collection("booked_session")
 
 
     app.get('/tutors/all', async (req, res) => {
@@ -91,7 +100,14 @@ async function run() {
       res.send(result)
     });
 
-    app.patch("/my-booked-session/:tutorId", verifyToken, async (req, res) => {
+
+    app.get("/booked-session/:userId", verifyToken, async (req, res) => {
+      const { userId } = req.params
+      const result = await sessionCollection.find({ userId: userId }).toArray();
+      res.send(result)
+    })
+
+    app.patch("/booked-session/:tutorId", verifyToken, async (req, res) => {
       const { tutorId } = req.params;
       const tutorData = req.body;
 
@@ -103,7 +119,7 @@ async function run() {
 
       await tutorsCollection.updateOne(
         { _id: new ObjectId(tutorId) },
-        { $inc: { bookedCount: -1 } }
+        { $inc: { bookedCount: 1 } }
       );
 
       const result = await sessionCollection.insertOne({
@@ -121,8 +137,8 @@ async function run() {
     // await client.close(); 
   }
 }
-run().catch(console.dir);
 
+run().catch(console.dir);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
