@@ -45,7 +45,7 @@ const verifyToken = async (req, res, next) => {
 
   try {
     const JWKS = createRemoteJWKSet(
-      new URL('http://localhost:3000/api/auth/jwks')
+      new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
     )
     const { payload } = await jwtVerify(token, JWKS);
     req.user = payload;
@@ -54,11 +54,12 @@ const verifyToken = async (req, res, next) => {
   }
 
   catch (error) {
-    console.error('Token validation failed:', error)
-    throw error
-    return res.status(401).json({ message: "Unauthorized" });
+  
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Invalid or expired token"
+    });
   }
-
 }
 
 
