@@ -53,14 +53,6 @@ const verifyToken = async (req, res, next) => {
     next();
   }
 
-  //   catch (error) {
-  //   console.error(error);
-
-  //   return res.status(401).json({
-  //     success: false,
-  //     message: error.message,
-  //   });
-  // }
   catch (error) {
 
     return res.status(401).json({
@@ -74,8 +66,6 @@ const verifyToken = async (req, res, next) => {
 async function run() {
   try {
 
-    // await client.connect();
-
     const db = client.db("mediqueue")
     const tutorsCollection = db.collection("tutors")
     const sessionCollection = db.collection("booked_session")
@@ -88,17 +78,8 @@ async function run() {
     });
 
     app.get('/tutors', async (req, res) => {
-
-      // const { search } = req.query;
-      // let cursor;
-
-      // if (search) {
-      //   cursor = tutorsCollection.find({ title: { $eq: search } });
-      // } else { const cursor = tutorsCollection.find().limit(6) }
-
       const cursor = tutorsCollection.find().limit(6)
       const result = await cursor.toArray()
-
       res.send(result)
     });
 
